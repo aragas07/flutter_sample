@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'dart:io';
+
+import 'package:image_picker/image_picker.dart';
 void main() {
   runApp(const MyApp());
 }
@@ -48,6 +51,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  File? image;
   int _counter = 0;
 
   void _incrementCounter() {
@@ -61,55 +65,105 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  Future getImage() async{
+    try{
+      PickedFile? image = await ImagePicker().getImage(source: ImageSource.camera);
+      final imageTemp = File(image!.path);
+      setState(()=>this.image = imageTemp);
+    }on SocketException catch(e){
+      print('Failed to pick image: $e');
+    }
+  }
+  
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
+      appBar: AppBar(title: const Text("Plant Pitcher"),backgroundColor: Colors.green),
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Container(
+                margin: EdgeInsets.all(10),
+                child: MaterialButton(
+                  onPressed: (){getImage();},
+                  color: Colors.blue,
+                  child: const Text(
+                    "SCAN",
+                    style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold, fontSize: 19
+                    )
+                  )
+                )
+              ),
+              Container(
+                width: MediaQuery.of(context).size.width,
+                child: image != null ? Image.file(File(image!.path)) : Text("null"),
+              ),
+              _output != null ? Text(
+                (_output![0]['label'].toString().substring(2)),
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 23)
+                ):Text(""),
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                  alignment: Alignment.bottomLeft,
+                  child: const Text("Characteristics", textAlign: TextAlign.right, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
+                ),
+                Container(
+                  child: Column(
+                    children: [
+                      for(int x = 0; x < _items![0]['Characteristics'].length ;x++)...[
+                        Container(
+                          alignment: Alignment.bottomLeft,
+                          margin: const EdgeInsets.only(left: 20),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                          child: Text("• "+_items![0]['Characteristics'][x].toString())
+                        ),
+                      ],
+                    ],
+                  )
+                ),
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                  padding: const EdgeInsets.only(top: 7),
+                  alignment: Alignment.bottomLeft,
+                  child: const Text("Etymology", textAlign: TextAlign.right, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
+                ),
+                Container(
+                  alignment: Alignment.bottomLeft,
+                  margin: const EdgeInsets.only(left: 20),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                  child: Text("• "+_items![0]['Etymology'].toString())
+                ),
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                  padding: const EdgeInsets.only(top: 7),
+                  alignment: Alignment.bottomLeft,
+                  child: const Text("Ecology and Distribution", textAlign: TextAlign.right, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
+                ),
+                Container(
+                  alignment: Alignment.bottomLeft,
+                  margin: const EdgeInsets.only(left: 20),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                  child: Text("• "+_items![0]['Ecology and Distribution'].toString())
+                ),
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                  padding: const EdgeInsets.only(top: 7),
+                  alignment: Alignment.bottomLeft,
+                  child: const Text("Conservation Notes", textAlign: TextAlign.right, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
+                ),
+                Container(
+                  alignment: Alignment.bottomLeft,
+                  margin: const EdgeInsets.only(left: 20),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                  child: Text("• "+_items![0]['Conservation Notes'].toString())
+                )
+
+            ],
+          ),
+        )
+      )
     );
   }
 }
